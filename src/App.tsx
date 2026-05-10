@@ -221,6 +221,26 @@ function App() {
                 <FeatureCard icon={<Pill className="w-4 h-4" />} title="Treatment" />
               </div>
             )}
+
+            {/* NPK Nutrient Analysis - Left Side */}
+            {result && result.npk_levels && result.disease_type !== 'invalid_image' && (
+              <div className="mt-2 glass-panel p-5 animate-fade-in">
+                <h4 className="font-display font-bold text-base mb-4 flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-tertiary_dim/15 flex items-center justify-center">
+                    <Sprout className="w-4 h-4 text-tertiary_dim" />
+                  </div>
+                  Soil Nutrient Analysis (NPK)
+                </h4>
+                <div className="grid grid-cols-1 gap-3">
+                  <NutrientGauge name="Nitrogen" symbol="N" color="emerald" data={result.npk_levels.nitrogen} />
+                  <NutrientGauge name="Phosphorus" symbol="P" color="amber" data={result.npk_levels.phosphorus} />
+                  <NutrientGauge name="Potassium" symbol="K" color="violet" data={result.npk_levels.potassium} />
+                </div>
+                <p className="text-[10px] text-on_surface_variant/40 mt-3 italic text-center">
+                  NPK levels are AI-predicted based on visual leaf symptoms and may vary from actual soil test results.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Right Column - Results Dashboard */}
@@ -281,12 +301,12 @@ function App() {
                   <ResultCard
                     icon={<AlertTriangle className="w-4 h-4 text-tertiary_dim" />}
                     title="Observed Symptoms"
-                    items={result.symptoms}
+                    items={result.symptoms?.slice(0, 3)}
                   />
                   <ResultCard
                     icon={<Droplets className="w-4 h-4 text-tertiary_dim" />}
                     title="Possible Causes"
-                    items={result.possible_causes}
+                    items={result.possible_causes?.slice(0, 3)}
                   />
                 </div>
 
@@ -296,7 +316,7 @@ function App() {
                     <Zap className="w-4 h-4" /> Treatment Protocol
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {result.treatment?.length > 0 ? result.treatment.map((treatment, idx) => (
+                    {result.treatment?.length > 0 ? result.treatment.slice(0, 4).map((treatment, idx) => (
                       <div key={idx} className="bg-surface_container/80 border border-outline_variant/20 p-3.5 rounded-xl text-xs sm:text-sm leading-relaxed flex items-start gap-2.5">
                          <div className="w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0 text-primary font-bold text-[10px]">{idx + 1}</div>
                          <span className="text-on_surface_variant">{treatment}</span>
@@ -313,25 +333,7 @@ function App() {
                    <span>{result.analysis_timestamp ? new Date(result.analysis_timestamp).toLocaleString() : new Date().toLocaleString()}</span>
                 </div>
 
-                {/* NPK Nutrient Analysis */}
-                {result.npk_levels && result.disease_type !== 'invalid_image' && (
-                  <div className="mt-4 pt-4 border-t border-outline_variant/15">
-                    <h4 className="font-display font-bold text-base sm:text-lg mb-4 flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-lg bg-tertiary_dim/15 flex items-center justify-center">
-                        <Sprout className="w-4 h-4 text-tertiary_dim" />
-                      </div>
-                      Soil Nutrient Analysis (NPK)
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      <NutrientGauge name="Nitrogen" symbol="N" color="emerald" data={result.npk_levels.nitrogen} />
-                      <NutrientGauge name="Phosphorus" symbol="P" color="amber" data={result.npk_levels.phosphorus} />
-                      <NutrientGauge name="Potassium" symbol="K" color="violet" data={result.npk_levels.potassium} />
-                    </div>
-                    <p className="text-[10px] text-on_surface_variant/40 mt-3 italic text-center">
-                      NPK levels are AI-predicted based on visual leaf symptoms and may vary from actual soil test results.
-                    </p>
-                  </div>
-                )}
+                {/* NPK is now in the left column */}
               </div>
             )}
           </div>
@@ -469,7 +471,7 @@ function NutrientGauge({ name, symbol, color, data }: {
       </div>
 
       {/* Description */}
-      <p className="text-[10px] text-on_surface_variant/60 leading-relaxed">{description}</p>
+      <p className="text-[10px] text-on_surface_variant/60 leading-relaxed line-clamp-2">{description}</p>
     </div>
   );
 }
