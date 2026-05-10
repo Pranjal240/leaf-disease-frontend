@@ -3,7 +3,7 @@ import { UploadCloud, FileImage, ShieldAlert, CheckCircle2, AlertTriangle, Steth
 
 // ====== CONFIGURABLE API URL ======
 // Set VITE_API_URL in .env for local override, otherwise uses Render backend
-const API_BASE_URL = 'https://leaf-disease-backend-ryzn.onrender.com';
+const API_BASE_URL = 'https://leaf-disease-backend-us.onrender.com';
 
 interface NutrientLevel {
   level: number;
