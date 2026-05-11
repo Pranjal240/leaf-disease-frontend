@@ -65,16 +65,45 @@ function App() {
     setError(null);
   };
 
+  const compressImage = (file: File, maxWidth = 1200, quality = 0.7): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Canvas not supported'));
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => blob ? resolve(blob) : reject(new Error('Compression failed')),
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => reject(new Error('Image load failed'));
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const analyzeImage = async () => {
     if (!file) return;
 
     setLoading(true);
     setError(null);
     
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
+      // Compress image before uploading (reduces ~5-15MB phone photos to ~100-300KB)
+      const compressed = await compressImage(file);
+      
+      const formData = new FormData();
+      formData.append('file', compressed, 'leaf.jpg');
+
       const response = await fetch(`${API_BASE_URL}/disease-detection-file`, {
         method: 'POST',
         body: formData,
