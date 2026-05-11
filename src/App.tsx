@@ -363,7 +363,7 @@ function App() {
                 
                 {/* Timestamp */}
                 <div className="mt-4 text-[10px] text-on_surface_variant/50 flex justify-between items-center border-t border-outline_variant/15 pt-3">
-                   <span>AI MADHU · Google Gemini Vision</span>
+                   <span>AI MADHU · Plant Disease Detection</span>
                    <span>{result.analysis_timestamp ? new Date(result.analysis_timestamp).toLocaleString() : new Date().toLocaleString()}</span>
                 </div>
 
