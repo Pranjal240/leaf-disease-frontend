@@ -68,7 +68,9 @@ function App() {
   const compressImage = (file: File, maxWidth = 1200, quality = 0.7): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
       img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
         let { width, height } = img;
         if (width > maxWidth) {
           height = Math.round((height * maxWidth) / width);
@@ -86,8 +88,11 @@ function App() {
           quality
         );
       };
-      img.onerror = () => reject(new Error('Image load failed'));
-      img.src = URL.createObjectURL(file);
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Image load failed'));
+      };
+      img.src = objectUrl;
     });
   };
 
