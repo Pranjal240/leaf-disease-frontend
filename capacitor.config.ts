@@ -5,12 +5,20 @@ const config: CapacitorConfig = {
   appName: 'AI MADHU',
   webDir: 'dist',
   server: {
-    // For development: uncomment and set to your backend IP
-    // cleartext: true,
-    androidScheme: 'https'
+    androidScheme: 'https',
+    allowNavigation: [
+      'leaf-disease-backend-us.onrender.com',
+      '*.onrender.com'
+    ]
   },
   android: {
     allowMixedContent: true,
+    captureInput: true,
+  },
+  plugins: {
+    CapacitorHttp: {
+      enabled: true
+    }
   }
 };
 

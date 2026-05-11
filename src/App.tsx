@@ -109,19 +109,31 @@ function App() {
       const formData = new FormData();
       formData.append('file', compressed, 'leaf.jpg');
 
-      const response = await fetch(`${API_BASE_URL}/disease-detection-file`, {
-        method: 'POST',
-        body: formData,
+      // Use XMLHttpRequest for better Capacitor native HTTP interception on Android
+      const data = await new Promise<AnalysisResult>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${API_BASE_URL}/disease-detection-file`);
+        xhr.timeout = 120000; // 2 minute timeout for cold starts
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              resolve(JSON.parse(xhr.responseText));
+            } catch {
+              reject(new Error('Invalid response from server'));
+            }
+          } else {
+            reject(new Error(`Server responded with ${xhr.status}`));
+          }
+        };
+        xhr.onerror = () => reject(new Error('Network error — check your internet connection'));
+        xhr.ontimeout = () => reject(new Error('Request timed out — server may be starting up, please try again'));
+        xhr.send(formData);
       });
 
-      if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}`);
-      }
-
-      const data = await response.json();
       setResult(data);
-    } catch (err) {
-      setError('Failed to analyze the image. Please ensure the backend server is running.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(`Analysis failed: ${message}`);
       console.error(err);
     } finally {
       setLoading(false);
