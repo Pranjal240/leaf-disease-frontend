@@ -96,6 +96,16 @@ function App() {
     });
   };
 
+  // Helper: convert a Blob to a base64 data URI string
+  const blobToBase64 = (blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to read image'));
+      reader.readAsDataURL(blob);
+    });
+  };
+
   const analyzeImage = async () => {
     if (!file) return;
 
@@ -106,13 +116,14 @@ function App() {
       // Compress image before uploading (reduces ~5-15MB phone photos to ~100-300KB)
       const compressed = await compressImage(file);
       
-      const formData = new FormData();
-      formData.append('file', compressed, 'leaf.jpg');
+      // Convert to base64 for JSON upload (avoids Capacitor FormData binary corruption)
+      const base64Data = await blobToBase64(compressed);
 
-      // Use XMLHttpRequest for better Capacitor native HTTP interception on Android
+      // Send as JSON — works reliably on both web and Android Capacitor WebView
       const data = await new Promise<AnalysisResult>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', `${API_BASE_URL}/disease-detection-file`);
+        xhr.open('POST', `${API_BASE_URL}/disease-detection-base64`);
+        xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.timeout = 120000; // 2 minute timeout for cold starts
         xhr.onload = () => {
           if (xhr.status >= 200 && xhr.status < 300) {
@@ -127,7 +138,7 @@ function App() {
         };
         xhr.onerror = () => reject(new Error('Network error — check your internet connection'));
         xhr.ontimeout = () => reject(new Error('Request timed out — server may be starting up, please try again'));
-        xhr.send(formData);
+        xhr.send(JSON.stringify({ image: base64Data }));
       });
 
       setResult(data);
